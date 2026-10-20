@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encargar {{ producto.nombre }} | Pastelería Artesanal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        pastry: {
+                            50: '#FDF8F5',
+                            100: '#F9EDE5',
+                            500: '#C86D51',
+                            600: '#B05338',
+                            900: '#3D1C13'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-pastry-50 text-stone-800 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
+
+    <div class="max-w-xl w-full bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-pastry-900/5 border border-pastry-100">
+        
+        <!-- Botón Volver -->
+        <a href="/" class="inline-flex items-center gap-1.5 text-xs font-bold text-pastry-600 hover:text-pastry-900 mb-6 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Volver al catálogo
+        </a>
+
+        <!-- Encabezado del Producto -->
+        <div class="flex items-center justify-between pb-6 border-b border-stone-100">
+            <div>
+                <span class="text-xs font-bold text-pastry-500 uppercase tracking-wider block">{{ producto.categoria.nombre }}</span>
+                <h1 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">{{ producto.nombre }}</h1>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-stone-400 block">Unitario</span>
+                <span class="text-xl font-black text-pastry-900" id="precio-unitario" data-precio="{{ producto.precio }}">${{ producto.precio }}</span>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <form method="POST" enctype="multipart/form-data" class="space-y-6 mt-6">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-xs space-y-1">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <p class="font-semibold">⚠️ {{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Selector de Cantidad interactivo -->
+            <div class="bg-pastry-50/60 p-4 rounded-2xl border border-pastry-100 flex items-center justify-between">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-stone-600">Cantidad deseada</label>
+                    <span class="text-xs text-stone-400">Cupo disponible: {{ producto.stock_disponible }}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="button" id="btn-restar" class="w-9 h-9 rounded-full bg-white border border-stone-200 text-stone-700 font-bold hover:bg-pastry-100 transition shadow-sm active:scale-95 flex items-center justify-center">-</button>
+                    <input type="number" id="input-cantidad" name="cantidad" value="1" min="1" max="{{ producto.stock_disponible }}" class="w-12 text-center font-bold text-lg bg-transparent focus:outline-none" readonly>
+                    <button type="button" id="btn-sumar" class="w-9 h-9 rounded-full bg-white border border-stone-200 text-stone-700 font-bold hover:bg-pastry-100 transition shadow-sm active:scale-95 flex items-center justify-center">+</button>
+                </div>
+            </div>
+
+            <!-- Datos de contacto -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">Tu Nombre y Apellido *</label>
+                    {{ form.cliente_nombre }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">WhatsApp de Contacto *</label>
+                    {{ form.cliente_telefono }}
+                </div>
+            </div>
+
+            <!-- Correo Electrónico -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">Correo Electrónico (opcional)</label>
+                {{ form.cliente_email }}
+                <span class="text-[11px] text-stone-400 mt-1 block">Para recibir el comprobante y detalle de tu pedido por email.</span>
+            </div>
+
+            <!-- Fecha y Hora -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">Fecha y hora de entrega o retiro *</label>
+                {{ form.fecha_entrega }}
+                <span class="text-[11px] text-stone-400 mt-1 block">Por favor especifica con al menos 24hs de anticipación.</span>
+            </div>
+
+            <!-- Notas -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">Notas especiales / Dedicatoria</label>
+                {{ form.notas }}
+            </div>
+
+            <!-- Comprobante de Seña con Drag & Drop y Preview -->
+            <div class="p-5 rounded-2xl border-2 border-dashed border-pastry-100 bg-pastry-50/40 text-center">
+                <span class="text-3xl block mb-1">🧾</span>
+                <label class="block text-xs font-bold uppercase tracking-wider text-pastry-900 mb-0.5">Comprobante de seña (Opcional)</label>
+                <p class="text-xs text-stone-500 mb-3">Adjunta captura o PDF de la transferencia para agilizar la confirmación.</p>
+                
+                {{ form.comprobante_sena }}
+
+                <!-- Contenedor de Previsualización -->
+                <div id="preview-container" class="hidden mt-4 pt-3 border-t border-stone-200 flex items-center justify-center gap-3">
+                    <img id="preview-img" src="" alt="Vista previa" class="w-14 h-14 object-cover rounded-lg border border-stone-200 shadow-sm">
+                    <div class="text-left">
+                        <span id="preview-name" class="text-xs font-semibold text-stone-700 block truncate max-w-xs">archivo.jpg</span>
+                        <span class="text-[10px] text-emerald-600 font-bold">✔ Listo para subir</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Costo Total en Tiempo Real -->
+            <div class="bg-stone-900 text-white p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-stone-400 uppercase font-semibold tracking-wider block">Total estimado</span>
+                    <span class="text-xs text-stone-400">Pagas el saldo restante al retirar</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-300" id="precio-total">$0</span>
+                </div>
+            </div>
+
+            <!-- Botón Submit -->
+            <button type="submit" class="w-full bg-pastry-600 hover:bg-pastry-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-pastry-600/30 transition transform active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base">
+                <span>Confirmar y Agendar Pedido</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Script de interactividad en tiempo real -->
+    <script>
+        const precioUnitario = parseFloat(document.getElementById('precio-unitario').dataset.precio);
+        const inputCantidad = document.getElementById('input-cantidad');
+        const precioTotal = document.getElementById('precio-total');
+        const btnSumar = document.getElementById('btn-sumar');
+        const btnRestar = document.getElementById('btn-restar');
+        const maxStock = parseInt("{{ producto.stock_disponible }}");
+
+        function actualizarTotal() {
+            const cantidad = parseInt(inputCantidad.value) || 1;
+            const total = (precioUnitario * cantidad).toLocaleString('es-AR', { minimumFractionDigits: 2 });
+            precioTotal.textContent = '$' + total;
+        }
+
+        btnSumar.addEventListener('click', () => {
+            let actual = parseInt(inputCantidad.value);
+            if (actual < maxStock) {
+                inputCantidad.value = actual + 1;
+                actualizarTotal();
+            }
+        });
+
+        btnRestar.addEventListener('click', () => {
+            let actual = parseInt(inputCantidad.value);
+            if (actual > 1) {
+                inputCantidad.value = actual - 1;
+                actualizarTotal();
+            }
+        });
+
+        // Preview del comprobante de seña
+        const fileInput = document.querySelector('input[type="file"]');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImg = document.getElementById('preview-img');
+        const previewName = document.getElementById('preview-name');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    previewName.textContent = file.name;
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            previewImg.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewImg.classList.add('hidden');
+                    }
+                    previewContainer.classList.remove('hidden');
+                }
+            });
+        }
+
+        actualizarTotal();
+    </script>
+</body>
+</html>

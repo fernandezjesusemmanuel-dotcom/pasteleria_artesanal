@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Pedido Registrado con Éxito! - Pastelería Artesanal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        pastry: {
+                            50: '#FDF8F5',
+                            100: '#F9EDE5',
+                            500: '#C86D51',
+                            600: '#B05338',
+                            900: '#3D1C13'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-pastry-50 text-stone-800 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 shadow-2xl shadow-pastry-900/10 border border-pastry-100 text-center relative overflow-hidden">
+        
+        <!-- Elemento decorativo superior -->
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+            <svg class="w-10 h-10 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <span class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold tracking-wider uppercase mb-2">
+            ¡Agendado en cocina!
+        </span>
+        <h1 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900 mb-2">
+            ¡Gracias, {{ pedido.cliente_nombre }}!
+        </h1>
+        <p class="text-stone-500 text-xs sm:text-sm">
+            Recibimos tu solicitud. La pastelera ya tiene tu pedido en agenda para preparar.
+        </p>
+
+        <!-- Tarjeta tipo Ticket / Resumen -->
+        <div class="bg-pastry-50/70 border border-pastry-100 rounded-2xl p-5 my-6 text-left space-y-3 relative">
+            <div class="flex justify-between items-center text-xs pb-2 border-b border-pastry-100">
+                <span class="text-stone-400 font-semibold uppercase">Orden</span>
+                <span class="font-bold text-pastry-900">#{{ pedido.id }}</span>
+            </div>
+
+            <div class="flex justify-between items-center text-xs pb-2 border-b border-pastry-100">
+                <span class="text-stone-400 font-semibold uppercase">Fecha y Hora</span>
+                <span class="font-bold text-stone-800">{{ pedido.fecha_entrega|date:"d/m/Y \a \l\a\s H:i" }} hs</span>
+            </div>
+
+            <div class="flex justify-between items-center text-xs pb-2 border-b border-pastry-100">
+                <span class="text-stone-400 font-semibold uppercase">Comprobante de Seña</span>
+                {% if pedido.comprobante_sena %}
+                    <span class="inline-flex items-center gap-1 font-bold text-emerald-600">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        Adjuntado
+                    </span>
+                {% else %}
+                    <span class="text-amber-700 font-semibold">Pendiente de envío</span>
+                {% endif %}
+            </div>
+
+            <div class="flex justify-between items-center pt-1">
+                <span class="text-xs font-bold uppercase text-stone-600">Total a abonar</span>
+                <span class="text-2xl font-black text-pastry-900">${{ pedido.total }}</span>
+            </div>
+        </div>
+
+        <!-- Botón de WhatsApp Destacado -->
+        <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" 
+           class="group w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95 flex items-center justify-center gap-3 text-sm sm:text-base mb-3">
+            <span class="text-xl group-hover:scale-110 transition">💬</span>
+            <span>Avisar a la Pastelera por WhatsApp</span>
+        </a>
+
+        <p class="text-[11px] text-stone-400 mb-6 leading-relaxed">
+            Al tocar el botón se abrirá WhatsApp con el resumen de tu pedido listo para enviar.
+        </p>
+
+        <a href="/" class="text-xs font-bold text-pastry-600 hover:text-pastry-900 transition inline-block">
+            &larr; Volver a la tienda
+        </a>
+    </div>
+
+</body>
+</html>
