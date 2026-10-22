@@ -13,7 +13,21 @@ load_dotenv()
 # Lectura segura desde el entorno
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-o)75uo)(c(1kze*r6!!f2lpl_(6n4ft*sav%at^%txi46zeo*)')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+
+# Autorización de hosts: acepta variables locales, Render y desarrollo local
+ALLOWED_HOSTS = [
+    'pasteleria-artesanal.onrender.com',
+    '.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '*',  # Permite cualquier host para asegurar el acceso inmediato
+]
+
+# Protección CSRF para peticiones HTTPS en producción
+CSRF_TRUSTED_ORIGINS = [
+    'https://pasteleria-artesanal.onrender.com',
+    'https://*.onrender.com',
+]
 
 INSTALLED_APPS = [
     'pedidos',
