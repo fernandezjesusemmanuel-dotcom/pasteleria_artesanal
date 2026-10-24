@@ -10,17 +10,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Carga las variables del archivo .env
 load_dotenv()
 
-# Lectura segura desde el entorno
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-o)75uo)(c(1kze*r6!!f2lpl_(6n4ft*sav%at^%txi46zeo*)')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+# Lectura segura desde el entorno con clave de respaldo robusta
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    'django-secure-p@st3l3r1a-art3s4n4l-k3y-2026-prod-crypt-alpha-omega-9921481'
+)
 
-# Autorización de hosts: acepta variables locales, Render y desarrollo local
+# Modo depuración: en producción (Render) se evalúa False
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# Autorización de hosts: dominios de Render y entorno local (sin comodín '*')
 ALLOWED_HOSTS = [
     'pasteleria-artesanal.onrender.com',
     '.onrender.com',
     'localhost',
     '127.0.0.1',
-    '*',  # Permite cualquier host para asegurar el acceso inmediato
 ]
 
 # Protección CSRF para peticiones HTTPS en producción
@@ -29,6 +33,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
 ]
 
+# Aplicaciones instaladas
 INSTALLED_APPS = [
     'pedidos',
     'django.contrib.admin',
@@ -39,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+# Middlewares (incluye WhiteNoise para servir archivos estáticos)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -69,9 +75,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# Configuración de base de datos
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -79,6 +83,7 @@ DATABASES = {
     }
 }
 
+# Validación de contraseñas
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -86,16 +91,41 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Internacionalización y zona horaria
 LANGUAGE_CODE = 'es-ar'
 TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
 USE_TZ = True
 
+# Archivos estáticos y WhiteNoise
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Configuración de Correo Electrónico (consola para desarrollo)
+# Archivos multimedia (fotos de productos y comprobantes de seña)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Configuración de correo electrónico
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST_USER = 'pedidos@pasteleriaartesanal.com'
 PASTELERA_EMAIL = 'tu_correo@gmail.com'
+
+# --- DIRECTIVAS DE SEGURIDAD (HARDENING) ---
+# Cookies seguras (se activan automáticamente en producción / HTTPS)
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
+# Encabezados de protección del navegador contra XSS y Clickjacking
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# HSTS y redirección forzada a HTTPS solo en producción
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
