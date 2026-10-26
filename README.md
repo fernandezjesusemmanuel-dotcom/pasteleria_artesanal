@@ -10,6 +10,16 @@ Sistema web integral desarrollado con **Django** orientado a la gestión comerci
 * **Gestión de Estáticos:** WhiteNoise con compresión y cacheado `CompressedManifestStaticFilesStorage`.
 
 ---
+## 📦 Estrategia de Inicialización y Persistencia en la Nube (Seed Data)
+
+El servicio en producción corre bajo un contenedor con sistema de archivos efímero en Render. Con el objetivo de garantizar una experiencia de evaluación y auditoría ininterrumpida (sin depender de bases de datos externas de vencimiento temporal como PostgreSQL Free Tier de 30 días), se implementó una estrategia automatizada de **Database Seeding**:
+
+* **Aprovisionamiento Automático (`crear_admin.py`):** Inicializa de forma idempotente las credenciales del superusuario del panel de administración sin exponer contraseñas en el código fuente.
+* **Carga de Datos de Demostración (`poblar_datos.py`):** Inyecta automáticamente categorías de repostería, productos de catálogo activos con stock y fichas técnicas de materias primas/insumos con umbrales de alerta.
+* **Pipeline de Construcción Automatizado:** Durante cada ciclo de despliegue (`Build Command`), Render ejecuta de manera encadenada la recolección de estáticos, la aplicación de migraciones y la carga de datos base:
+  ```bash
+  pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python crear_admin.py && python poblar_datos.py
+---
 
 ## 🔒 Arquitectura de Seguridad y Hardening en Producción
 Para garantizar la integridad de los datos, la privacidad de los pedidos y la mitigación de vulnerabilidades comunes (OWASP Top 10), el sistema implementa las siguientes medidas validadas mediante la suite interna de auditoría de Django (`check --deploy`):
